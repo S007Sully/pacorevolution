@@ -146,8 +146,8 @@ function Onboarding() {
             <Label className="text-xs uppercase tracking-wider text-muted-foreground mb-2 block">Gallery ({photos.length})</Label>
             <div className="grid grid-cols-3 gap-2">
               {photos.map((url, i) => (
-                <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-border">
-                  <img src={url} alt="" className="h-full w-full object-cover" />
+                <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-border bg-card">
+                  <img src={url} alt="" className="absolute inset-0 h-full w-full object-cover" />
                   <button
                     type="button"
                     onClick={() => setPhotos(photos.filter((_, j) => j !== i))}
