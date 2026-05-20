@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import pacoLogo from "@/assets/paco-logo.jpeg";
+import pacoLogo from "@/assets/paco-logo.png";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
