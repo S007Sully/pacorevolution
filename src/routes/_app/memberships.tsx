@@ -11,12 +11,13 @@ export const Route = createFileRoute("/_app/memberships")({
   component: Memberships,
 });
 
-const TIERS = [
+type Tier = { id: string; label: string; price: string; perks: string[]; featured?: boolean };
+const TIERS: Tier[] = [
   { id: "initiate", label: "Initiate", price: "Free", perks: ["Discover the room", "Public events"] },
   { id: "noir", label: "Noir", price: "$49/mo", perks: ["Priority RSVP", "Member events"] },
   { id: "crimson", label: "Crimson", price: "$199/mo", perks: ["Inner circle", "Private rooms", "+1 invites"], featured: true },
   { id: "gold", label: "Gold", price: "By invitation", perks: ["Unlimited everything", "Concierge", "Yacht access"] },
-] as const;
+];
 
 function Memberships() {
   const { user } = useAuth();

@@ -24,7 +24,7 @@ function Messages() {
       const seen = new Map<string, Thread>();
       for (const m of msgs ?? []) {
         const other = m.sender_id === user.id ? m.receiver_id : m.sender_id;
-        if (!seen.has(other)) seen.set(other, { user_id: other, name: null, avatar_url: null, last: m.content, at: m.created_at });
+        if (!seen.has(other)) seen.set(other, { user_id: other, name: null, avatar_url: null, last: m.content, at: m.created_at ?? new Date().toISOString() });
       }
       const ids = [...seen.keys()];
       if (ids.length) {
