@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Camera, Plus, X } from "lucide-react";
 import pacoLogo from "@/assets/paco-logo.png";
+import { normalizeImageOrientation } from "@/lib/image-orientation";
 
 const goldInput =
   "flex h-11 w-full rounded-md border border-[color:var(--gold)]/40 bg-input px-3 py-1 text-base text-[color:var(--gold)] caret-[color:var(--gold)] shadow-sm transition-colors placeholder:text-[color:var(--gold)]/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[color:var(--gold)] focus-visible:border-[color:var(--gold)] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm";
@@ -59,12 +60,16 @@ function Onboarding() {
 
   const uploadOne = async (file: File, folder: "avatar" | "gallery") => {
     if (!user) return null;
-    const ext = file.name.split(".").pop();
+    const normalized = await normalizeImageOrientation(file);
+    const ext = normalized.type === "image/jpeg" ? "jpg" : (file.name.split(".").pop() || "jpg");
     const path = `${user.id}/${folder}-${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("profile-photos").upload(path, file);
+    const { error } = await supabase.storage
+      .from("profile-photos")
+      .upload(path, normalized, { contentType: normalized.type || "image/jpeg" });
     if (error) { toast.error(error.message); return null; }
     return supabase.storage.from("profile-photos").getPublicUrl(path).data.publicUrl;
   };
+
 
   const onAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]; if (!f) return;
