@@ -38,6 +38,13 @@ function AuthPage() {
         setStatus("success");
         toast.success("Welcome to the revolution");
         setTimeout(() => navigate({ to: "/onboarding" }), 700);
+      } else if (mode === "forgot") {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) throw error;
+        setStatus("success");
+        toast.success("Check your email for the reset link");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -60,7 +67,7 @@ function AuthPage() {
       return (
         <span className="flex items-center justify-center gap-2">
           <Loader2 className="h-4 w-4 animate-spin" />
-          {mode === "signin" ? "Opening the door…" : "Securing your spot…"}
+          {mode === "signin" ? "Opening the door…" : mode === "signup" ? "Securing your spot…" : "Sending link…"}
         </span>
       );
     }
@@ -68,11 +75,11 @@ function AuthPage() {
       return (
         <span className="flex items-center justify-center gap-2">
           <CheckCircle2 className="h-4 w-4" />
-          {mode === "signin" ? "Welcome back" : "You're in"}
+          {mode === "signin" ? "Welcome back" : mode === "signup" ? "You're in" : "Link sent"}
         </span>
       );
     }
-    return mode === "signin" ? "Sign in" : "Create account";
+    return mode === "signin" ? "Sign in" : mode === "signup" ? "Create account" : "Send reset link";
   };
 
   return (
