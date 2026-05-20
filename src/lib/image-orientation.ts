@@ -34,7 +34,7 @@ export async function normalizeImageOrientation(file: File): Promise<Blob> {
   if (!file.type.startsWith("image/")) return file;
   try {
     const orientation = await readExifOrientation(file);
-    const bitmap = await createImageBitmap(file).catch(() => null);
+    const bitmap = await createImageBitmap(file, { imageOrientation: "none" } as ImageBitmapOptions).catch(() => null);
     if (!bitmap) return file;
 
     const swap = orientation >= 5 && orientation <= 8;
