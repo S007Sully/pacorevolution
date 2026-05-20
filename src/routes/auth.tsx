@@ -4,22 +4,29 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import pacoLogo from "@/assets/paco-logo.png";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+type Status = "idle" | "loading" | "success" | "error";
+
 function AuthPage() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [status, setStatus] = useState<Status>("idle");
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const busy = status === "loading" || status === "success";
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setBusy(true);
+    setStatus("loading");
+    setErrorMsg(null);
     try {
       if (mode === "signup") {
         const { error } = await supabase.auth.signUp({
@@ -28,22 +35,45 @@ function AuthPage() {
           options: { emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
+        setStatus("success");
         toast.success("Welcome to the revolution");
-        navigate({ to: "/onboarding" });
+        setTimeout(() => navigate({ to: "/onboarding" }), 700);
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        navigate({ to: "/" });
+        setStatus("success");
+        setTimeout(() => navigate({ to: "/" }), 500);
       }
     } catch (err) {
-      toast.error((err as Error).message);
-    } finally {
-      setBusy(false);
+      const msg = (err as Error).message;
+      setErrorMsg(msg);
+      setStatus("error");
+      toast.error(msg);
     }
   };
 
   const goldInput =
     "flex h-11 w-full rounded-md border border-[color:var(--gold)]/40 bg-input px-3 py-1 text-base text-[color:var(--gold)] caret-[color:var(--gold)] shadow-sm transition-colors placeholder:text-[color:var(--gold)]/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[color:var(--gold)] focus-visible:border-[color:var(--gold)] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm";
+
+  const renderButtonContent = () => {
+    if (status === "loading") {
+      return (
+        <span className="flex items-center justify-center gap-2">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          {mode === "signin" ? "Opening the door…" : "Securing your spot…"}
+        </span>
+      );
+    }
+    if (status === "success") {
+      return (
+        <span className="flex items-center justify-center gap-2">
+          <CheckCircle2 className="h-4 w-4" />
+          {mode === "signin" ? "Welcome back" : "You're in"}
+        </span>
+      );
+    }
+    return mode === "signin" ? "Sign in" : "Create account";
+  };
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-6 py-10">
@@ -61,36 +91,71 @@ function AuthPage() {
         </p>
       </div>
 
-      <form onSubmit={submit} className="w-full max-w-sm space-y-4 glass rounded-2xl p-6 gold-border">
+      <form
+        onSubmit={submit}
+        className={`w-full max-w-sm space-y-4 glass rounded-2xl p-6 gold-border transition-all duration-500 ${
+          status === "loading" ? "opacity-90" : ""
+        } ${status === "success" ? "ring-1 ring-[color:var(--gold)]/60 glow-gold" : ""} ${
+          status === "error" ? "ring-1 ring-[color:var(--crimson)]/60" : ""
+        }`}
+        aria-busy={busy}
+      >
         <h2 className="text-lg font-semibold tracking-wide">
           {mode === "signin" ? "Enter the room" : "Request entry"}
         </h2>
 
-        <div className="space-y-2">
-          <Label htmlFor="email" className="text-xs uppercase tracking-wider text-[color:var(--gold)]/80">Email</Label>
-          <input
-            id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@revolution.club"
-            className={goldInput}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="password" className="text-xs uppercase tracking-wider text-[color:var(--gold)]/80">Password</Label>
-          <input
-            id="password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            className={goldInput}
-          />
-        </div>
+        <fieldset disabled={busy} className="space-y-4 contents">
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-xs uppercase tracking-wider text-[color:var(--gold)]/80">Email</Label>
+            <input
+              id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@revolution.club"
+              disabled={busy}
+              className={goldInput}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password" className="text-xs uppercase tracking-wider text-[color:var(--gold)]/80">Password</Label>
+            <input
+              id="password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              disabled={busy}
+              className={goldInput}
+            />
+          </div>
+        </fieldset>
 
-        <Button type="submit" disabled={busy} className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold tracking-wide glow-crimson">
-          {busy ? "..." : mode === "signin" ? "Sign in" : "Create account"}
+        {status === "error" && errorMsg && (
+          <div
+            role="alert"
+            className="flex items-start gap-2 rounded-md border border-[color:var(--crimson)]/40 bg-[color:var(--crimson)]/10 px-3 py-2 text-xs text-[color:var(--foreground)] animate-in fade-in slide-in-from-top-1 duration-300"
+          >
+            <AlertCircle className="h-4 w-4 mt-0.5 shrink-0 text-[color:var(--crimson)]" />
+            <span className="leading-relaxed">{errorMsg}</span>
+          </div>
+        )}
+
+        <Button
+          type="submit"
+          disabled={busy}
+          className={`w-full h-11 font-semibold tracking-wide transition-all duration-300 ${
+            status === "success"
+              ? "bg-[color:var(--gold)] text-[color:var(--gold-foreground)] hover:bg-[color:var(--gold)] glow-gold"
+              : "bg-primary hover:bg-primary/90 text-primary-foreground glow-crimson"
+          }`}
+        >
+          {renderButtonContent()}
         </Button>
 
         <button
           type="button"
-          onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-          className="w-full text-center text-xs text-muted-foreground hover:text-gold transition-colors"
+          disabled={busy}
+          onClick={() => {
+            setMode(mode === "signin" ? "signup" : "signin");
+            setStatus("idle");
+            setErrorMsg(null);
+          }}
+          className="w-full text-center text-xs text-muted-foreground hover:text-gold transition-colors disabled:opacity-50"
         >
           {mode === "signin" ? "New here? Request entry →" : "Already a member? Sign in →"}
         </button>
