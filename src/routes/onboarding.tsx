@@ -128,12 +128,14 @@ function Onboarding() {
             <button
               type="button"
               onClick={() => avatarInput.current?.click()}
-              className="relative h-32 w-32 rounded-full overflow-hidden gold-border bg-card flex items-center justify-center glow-gold"
+              className="relative h-32 w-32 shrink-0 rounded-full overflow-hidden gold-border bg-card glow-gold"
             >
               {avatar ? (
-                <img src={avatar} alt="" className="h-full w-full object-cover" />
+                <img src={avatar} alt="" className="absolute inset-0 h-full w-full object-cover" />
               ) : (
-                <Camera className="h-8 w-8 text-gold" />
+                <span className="absolute inset-0 flex items-center justify-center">
+                  <Camera className="h-8 w-8 text-gold" />
+                </span>
               )}
             </button>
             <input ref={avatarInput} type="file" accept="image/*" capture="user" hidden onChange={onAvatar} />
