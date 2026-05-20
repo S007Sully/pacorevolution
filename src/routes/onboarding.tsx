@@ -155,11 +155,47 @@ function Onboarding() {
           </div>
 
           <div>
-            <Label className="text-xs uppercase tracking-wider text-muted-foreground mb-2 block">Gallery ({photos.length})</Label>
+            <Label className="text-xs uppercase tracking-wider text-muted-foreground mb-2 block">
+              Gallery ({photos.length}){photos.length > 1 && <span className="ml-2 text-[10px] normal-case tracking-normal text-muted-foreground/70">— drag to reorder</span>}
+            </Label>
             <div className="grid grid-cols-3 gap-2">
               {photos.map((url, i) => (
-                <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-border bg-card">
-                  <img src={url} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                <div
+                  key={url}
+                  draggable
+                  onDragStart={(e) => {
+                    setDragIndex(i);
+                    e.dataTransfer.effectAllowed = "move";
+                  }}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = "move";
+                    if (overIndex !== i) setOverIndex(i);
+                  }}
+                  onDragLeave={() => {
+                    if (overIndex === i) setOverIndex(null);
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    if (dragIndex !== null) reorderPhotos(dragIndex, i);
+                    setDragIndex(null);
+                    setOverIndex(null);
+                  }}
+                  onDragEnd={() => {
+                    setDragIndex(null);
+                    setOverIndex(null);
+                  }}
+                  onTouchStart={() => setDragIndex(i)}
+                  className={`relative aspect-square rounded-lg overflow-hidden border bg-card cursor-grab active:cursor-grabbing transition-all ${
+                    dragIndex === i ? "opacity-40 scale-95" : ""
+                  } ${overIndex === i && dragIndex !== i ? "border-gold ring-2 ring-gold/40" : "border-border"}`}
+                >
+                  <img src={url} alt="" draggable={false} className="absolute inset-0 h-full w-full object-cover pointer-events-none" />
+                  {i === 0 && (
+                    <span className="absolute bottom-1 left-1 text-[9px] tracking-widest uppercase bg-black/70 text-gold px-1.5 py-0.5 rounded">
+                      Main
+                    </span>
+                  )}
                   <button
                     type="button"
                     onClick={() => setPhotos(photos.filter((_, j) => j !== i))}
