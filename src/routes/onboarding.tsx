@@ -8,6 +8,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Camera, Plus, X } from "lucide-react";
+import pacoLogo from "@/assets/paco-logo.png";
+
+const goldInput =
+  "flex h-11 w-full rounded-md border border-[color:var(--gold)]/40 bg-input px-3 py-1 text-base text-[color:var(--gold)] caret-[color:var(--gold)] shadow-sm transition-colors placeholder:text-[color:var(--gold)]/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[color:var(--gold)] focus-visible:border-[color:var(--gold)] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm";
+
+const goldTextarea =
+  "flex min-h-24 w-full rounded-md border border-[color:var(--gold)]/40 bg-input px-3 py-2 text-base text-[color:var(--gold)] caret-[color:var(--gold)] shadow-sm transition-colors placeholder:text-[color:var(--gold)]/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[color:var(--gold)] focus-visible:border-[color:var(--gold)] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm";
 
 export const Route = createFileRoute("/onboarding")({
   component: Onboarding,
@@ -83,7 +90,7 @@ function Onboarding() {
     <div className="min-h-screen px-6 py-10 max-w-md mx-auto">
       <div className="mb-8 flex items-center justify-between">
         <span className="text-xs tracking-[0.3em] text-muted-foreground">STEP {step + 1} / 3</span>
-        <span className="text-xs tracking-[0.3em] text-gradient-gold font-bold">PACO</span>
+        <img src={pacoLogo} alt="PACO Revolution" className="h-12 w-12 object-contain glow-gold" />
       </div>
 
       {step === 0 && (
@@ -93,16 +100,16 @@ function Onboarding() {
             <p className="text-sm text-muted-foreground mt-1">The basics. Keep it real.</p>
           </div>
           <div className="space-y-2">
-            <Label className="text-xs uppercase tracking-wider text-muted-foreground">Name</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} className="h-11 bg-input" placeholder="Your name" />
+            <Label className="text-xs uppercase tracking-wider text-[color:var(--gold)]/80">Name</Label>
+            <input value={name} onChange={(e) => setName(e.target.value)} className={goldInput} placeholder="Your name" />
           </div>
           <div className="space-y-2">
-            <Label className="text-xs uppercase tracking-wider text-muted-foreground">Bio</Label>
-            <Textarea value={bio} onChange={(e) => setBio(e.target.value)} className="bg-input min-h-24" placeholder="A line or two." />
+            <Label className="text-xs uppercase tracking-wider text-[color:var(--gold)]/80">Bio</Label>
+            <textarea value={bio} onChange={(e) => setBio(e.target.value)} className={goldTextarea} placeholder="A line or two." />
           </div>
           <div className="space-y-2">
-            <Label className="text-xs uppercase tracking-wider text-muted-foreground">City</Label>
-            <Input value={location} onChange={(e) => setLocation(e.target.value)} className="h-11 bg-input" placeholder="New York" />
+            <Label className="text-xs uppercase tracking-wider text-[color:var(--gold)]/80">City</Label>
+            <input value={location} onChange={(e) => setLocation(e.target.value)} className={goldInput} placeholder="New York" />
           </div>
           <Button onClick={() => setStep(1)} disabled={!name} className="w-full h-12 bg-primary text-primary-foreground font-semibold glow-crimson">
             Continue
