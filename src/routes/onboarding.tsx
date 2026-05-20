@@ -60,12 +60,16 @@ function Onboarding() {
 
   const uploadOne = async (file: File, folder: "avatar" | "gallery") => {
     if (!user) return null;
-    const ext = file.name.split(".").pop();
+    const normalized = await normalizeImageOrientation(file);
+    const ext = normalized.type === "image/jpeg" ? "jpg" : (file.name.split(".").pop() || "jpg");
     const path = `${user.id}/${folder}-${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("profile-photos").upload(path, file);
+    const { error } = await supabase.storage
+      .from("profile-photos")
+      .upload(path, normalized, { contentType: normalized.type || "image/jpeg" });
     if (error) { toast.error(error.message); return null; }
     return supabase.storage.from("profile-photos").getPublicUrl(path).data.publicUrl;
   };
+
 
   const onAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]; if (!f) return;
