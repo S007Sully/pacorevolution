@@ -46,12 +46,12 @@ function AuthPage() {
     "flex h-11 w-full rounded-md border border-[color:var(--gold)]/40 bg-input px-3 py-1 text-base text-[color:var(--gold)] caret-[color:var(--gold)] shadow-sm transition-colors placeholder:text-[color:var(--gold)]/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[color:var(--gold)] focus-visible:border-[color:var(--gold)] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm";
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-6 py-6">
+    <div className="flex min-h-screen flex-col items-center justify-center px-6 py-12">
       <div className="mb-10 text-center flex flex-col items-center">
         <img
           src={pacoLogo}
           alt="PACO Revolution"
-          className="w-40 h-40 object-contain mb-4 glow-gold"
+          className="w-40 h-40 object-contain mb-2 glow-gold"
         />
         <h1 className="text-5xl font-black tracking-[0.2em] text-gradient-gold">PACO</h1>
         <p className="mt-1 text-[10px] tracking-[0.5em] text-muted-foreground">REVOLUTION</p>
