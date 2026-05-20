@@ -138,7 +138,7 @@ function Onboarding() {
                 </span>
               )}
             </button>
-            <input ref={avatarInput} type="file" accept="image/*" capture="user" hidden onChange={onAvatar} />
+            <input ref={avatarInput} type="file" accept="image/*" hidden onChange={onAvatar} />
             <span className="text-xs text-muted-foreground">Tap to add profile photo</span>
           </div>
 
