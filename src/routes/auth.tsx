@@ -108,7 +108,7 @@ function AuthPage() {
         aria-busy={busy}
       >
         <h2 className="text-lg font-semibold tracking-wide">
-          {mode === "signin" ? "Enter the room" : "Request entry"}
+          {mode === "signin" ? "Enter the room" : mode === "signup" ? "Request entry" : "Reset password"}
         </h2>
 
         <fieldset disabled={busy} className="space-y-4 contents">
@@ -121,15 +121,29 @@ function AuthPage() {
               className={goldInput}
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="password" className="text-xs uppercase tracking-wider text-[color:var(--gold)]/80">Password</Label>
-            <input
-              id="password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              disabled={busy}
-              className={goldInput}
-            />
-          </div>
+          {mode !== "forgot" && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password" className="text-xs uppercase tracking-wider text-[color:var(--gold)]/80">Password</Label>
+                {mode === "signin" && (
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => { setMode("forgot"); setStatus("idle"); setErrorMsg(null); }}
+                    className="text-[10px] uppercase tracking-wider text-muted-foreground hover:text-gold transition-colors disabled:opacity-50"
+                  >
+                    Forgot?
+                  </button>
+                )}
+              </div>
+              <input
+                id="password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                disabled={busy}
+                className={goldInput}
+              />
+            </div>
+          )}
         </fieldset>
 
         {status === "error" && errorMsg && (
@@ -158,13 +172,16 @@ function AuthPage() {
           type="button"
           disabled={busy}
           onClick={() => {
-            setMode(mode === "signin" ? "signup" : "signin");
+            const next = mode === "signin" ? "signup" : "signin";
+            setMode(next);
             setStatus("idle");
             setErrorMsg(null);
           }}
           className="w-full text-center text-xs text-muted-foreground hover:text-gold transition-colors disabled:opacity-50"
         >
-          {mode === "signin" ? "New here? Request entry →" : "Already a member? Sign in →"}
+          {mode === "signin" && "New here? Request entry →"}
+          {mode === "signup" && "Already a member? Sign in →"}
+          {mode === "forgot" && "← Back to sign in"}
         </button>
       </form>
     </div>
