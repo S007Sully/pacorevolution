@@ -46,16 +46,17 @@ function AuthPage() {
     "flex h-11 w-full rounded-md border border-[color:var(--gold)]/40 bg-input px-3 py-1 text-base text-[color:var(--gold)] caret-[color:var(--gold)] shadow-sm transition-colors placeholder:text-[color:var(--gold)]/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[color:var(--gold)] focus-visible:border-[color:var(--gold)] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm";
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-6 py-12">
-      <div className="mb-10 text-center flex flex-col items-center">
+    <div className="flex min-h-screen flex-col items-center justify-center px-6 py-10">
+      <div className="mb-8 text-center flex flex-col items-center">
         <img
           src={pacoLogo}
           alt="PACO Revolution"
-          className="w-40 h-40 object-contain mb-2 glow-gold"
+          className="w-36 h-36 object-contain -mb-1 glow-gold"
         />
-        <h1 className="text-5xl font-black tracking-[0.2em] text-gradient-gold">PACO</h1>
-        <p className="mt-1 text-[10px] tracking-[0.5em] text-muted-foreground">REVOLUTION</p>
-        <p className="mt-6 text-sm text-muted-foreground max-w-xs">
+        <h1 className="text-4xl font-black tracking-[0.25em] text-gradient-gold">PACO</h1>
+        <p className="mt-1.5 text-[10px] tracking-[0.5em] text-muted-foreground">REVOLUTION</p>
+        <div className="mt-5 h-px w-16 bg-gradient-to-r from-transparent via-[color:var(--gold)]/60 to-transparent" />
+        <p className="mt-4 text-sm text-muted-foreground max-w-xs leading-relaxed">
           A private social club for the world's most curious nightlife.
         </p>
       </div>
