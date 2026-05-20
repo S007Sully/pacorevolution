@@ -51,7 +51,7 @@ function AuthPage() {
         <img
           src={pacoLogo}
           alt="PACO Revolution"
-          className="w-40 h-40 object-contain mb-4 glow-gold"
+          className="w-40 h-40 object-contain mb-2 glow-gold"
         />
         <h1 className="text-5xl font-black tracking-[0.2em] text-gradient-gold">PACO</h1>
         <p className="mt-1 text-[10px] tracking-[0.5em] text-muted-foreground">REVOLUTION</p>
