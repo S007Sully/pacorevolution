@@ -2,9 +2,9 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import pacoLogo from "@/assets/paco-logo.jpeg";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
@@ -42,9 +42,17 @@ function AuthPage() {
     }
   };
 
+  const goldInput =
+    "flex h-11 w-full rounded-md border border-[color:var(--gold)]/40 bg-input px-3 py-1 text-base text-[color:var(--gold)] caret-[color:var(--gold)] shadow-sm transition-colors placeholder:text-[color:var(--gold)]/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[color:var(--gold)] focus-visible:border-[color:var(--gold)] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm";
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-6 py-12">
-      <div className="mb-10 text-center">
+      <div className="mb-10 text-center flex flex-col items-center">
+        <img
+          src={pacoLogo}
+          alt="PACO Revolution"
+          className="w-24 h-24 object-contain rounded-2xl mb-5 glow-gold"
+        />
         <h1 className="text-5xl font-black tracking-[0.2em] text-gradient-gold">PACO</h1>
         <p className="mt-1 text-[10px] tracking-[0.5em] text-muted-foreground">REVOLUTION</p>
         <p className="mt-6 text-sm text-muted-foreground max-w-xs">
@@ -58,17 +66,19 @@ function AuthPage() {
         </h2>
 
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-xs uppercase tracking-wider text-muted-foreground">Email</Label>
-          <Input
+          <Label htmlFor="email" className="text-xs uppercase tracking-wider text-[color:var(--gold)]/80">Email</Label>
+          <input
             id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-            className="bg-input border-border h-11"
+            placeholder="you@revolution.club"
+            className={goldInput}
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="password" className="text-xs uppercase tracking-wider text-muted-foreground">Password</Label>
-          <Input
+          <Label htmlFor="password" className="text-xs uppercase tracking-wider text-[color:var(--gold)]/80">Password</Label>
+          <input
             id="password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)}
-            className="bg-input border-border h-11"
+            placeholder="••••••••"
+            className={goldInput}
           />
         </div>
 
