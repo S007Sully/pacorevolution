@@ -90,7 +90,7 @@ function Onboarding() {
     <div className="min-h-screen px-6 py-10 max-w-md mx-auto">
       <div className="mb-8 flex items-center justify-between">
         <span className="text-xs tracking-[0.3em] text-muted-foreground">STEP {step + 1} / 3</span>
-        <span className="text-xs tracking-[0.3em] text-gradient-gold font-bold">PACO</span>
+        <img src={pacoLogo} alt="PACO Revolution" className="h-12 w-12 object-contain glow-gold" />
       </div>
 
       {step === 0 && (
