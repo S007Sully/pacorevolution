@@ -38,8 +38,20 @@ function Onboarding() {
   const [avatar, setAvatar] = useState<string | null>(null);
   const [photos, setPhotos] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [overIndex, setOverIndex] = useState<number | null>(null);
   const avatarInput = useRef<HTMLInputElement>(null);
   const photosInput = useRef<HTMLInputElement>(null);
+
+  const reorderPhotos = (from: number, to: number) => {
+    if (from === to) return;
+    setPhotos((prev) => {
+      const next = [...prev];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/auth" });
