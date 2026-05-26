@@ -13,10 +13,31 @@ export const Route = createFileRoute("/_app/memberships")({
 
 type Tier = { id: string; label: string; price: string; perks: string[]; featured?: boolean };
 const TIERS: Tier[] = [
-  { id: "curious-guest", label: "Curious Guest", price: "Free", perks: ["Discover the room", "Public events"] },
-  { id: "basic-access", label: "Basic Access", price: "$49/mo", perks: ["Priority RSVP", "Member events"] },
-  { id: "elevated-access", label: "Elevated Access", price: "$199/mo", perks: ["Inner circle", "Private rooms", "+1 invites"], featured: true },
-  { id: "prestige-access", label: "Prestige Access", price: "By invitation", perks: ["Unlimited everything", "Concierge", "Yacht access"] },
+  {
+    id: "curious-guest",
+    label: "Curious Guest Access",
+    price: "Free",
+    perks: ["Browse exclusive events", "View member profiles", "Reply to direct messages", "Purchase individual event tickets"]
+  },
+  {
+    id: "basic-access",
+    label: "Basic Access",
+    price: "$29/mo",
+    perks: ["Full swipe & match features", "Unlimited direct messaging", "Priority RSVP to events", "Mansion Party access", "Private Champagne Socials"]
+  },
+  {
+    id: "elevated-access",
+    label: "Elevated Access",
+    price: "$199/mo",
+    perks: ["See who liked your profile", "1 complimentary Mansion Party ticket pair/year", "Guaranteed entry to all 5 premier Mansion Parties", "Message anyone in your tier or higher", "All member-only curated experiences"],
+    featured: true
+  },
+  {
+    id: "prestige-access",
+    label: "Prestige Access",
+    price: "$79/mo",
+    perks: ["Unlimited VIP access to all events", "Priority placement in Discover feed", "Read receipts enabled", "Plus-One privileges", "24/7 Concierge support"]
+  },
 ];
 
 function Memberships() {
@@ -34,7 +55,7 @@ function Memberships() {
     const { error } = await supabase.from("profiles").update({ membership_tier: id }).eq("user_id", user.id);
     if (error) return toast.error(error.message);
     setCurrent(id);
-    toast.success(`Welcome to ${id.toUpperCase()}`);
+    toast.success(`Welcome to ${TIERS.find(t => t.id === id)?.label ?? id}`);
   };
 
   return (
