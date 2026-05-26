@@ -13,15 +13,15 @@ export const Route = createFileRoute("/_app/memberships")({
 
 type Tier = { id: string; label: string; price: string; perks: string[]; featured?: boolean };
 const TIERS: Tier[] = [
-  { id: "initiate", label: "Initiate", price: "Free", perks: ["Discover the room", "Public events"] },
-  { id: "noir", label: "Noir", price: "$49/mo", perks: ["Priority RSVP", "Member events"] },
-  { id: "crimson", label: "Crimson", price: "$199/mo", perks: ["Inner circle", "Private rooms", "+1 invites"], featured: true },
-  { id: "gold", label: "Gold", price: "By invitation", perks: ["Unlimited everything", "Concierge", "Yacht access"] },
+  { id: "curious-guest", label: "Curious Guest", price: "Free", perks: ["Discover the room", "Public events"] },
+  { id: "basic-access", label: "Basic Access", price: "$49/mo", perks: ["Priority RSVP", "Member events"] },
+  { id: "elevated-access", label: "Elevated Access", price: "$199/mo", perks: ["Inner circle", "Private rooms", "+1 invites"], featured: true },
+  { id: "prestige-access", label: "Prestige Access", price: "By invitation", perks: ["Unlimited everything", "Concierge", "Yacht access"] },
 ];
 
 function Memberships() {
   const { user } = useAuth();
-  const [current, setCurrent] = useState<string>("initiate");
+  const [current, setCurrent] = useState<string>("curious-guest");
 
   useEffect(() => {
     if (!user) return;

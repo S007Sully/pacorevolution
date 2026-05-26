@@ -22,10 +22,10 @@ export const Route = createFileRoute("/onboarding")({
 });
 
 const TIERS = [
-  { id: "initiate", label: "Initiate", desc: "Discover the world of Paco" },
-  { id: "noir", label: "Noir", desc: "Priority access to monthly events" },
-  { id: "crimson", label: "Crimson", desc: "Inner circle, private rooms, +1s" },
-  { id: "gold", label: "Gold", desc: "Unlimited everything. By invitation." },
+  { id: "curious-guest", label: "Curious Guest", desc: "Discover the world of Paco" },
+  { id: "basic-access", label: "Basic Access", desc: "Priority access to monthly events" },
+  { id: "elevated-access", label: "Elevated Access", desc: "Inner circle, private rooms, +1s" },
+  { id: "prestige-access", label: "Prestige Access", desc: "Unlimited everything. By invitation." },
 ] as const;
 
 function Onboarding() {
@@ -35,7 +35,7 @@ function Onboarding() {
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
   const [location, setLocation] = useState("");
-  const [tier, setTier] = useState<string>("initiate");
+  const [tier, setTier] = useState<string>("curious-guest");
   const [avatar, setAvatar] = useState<string | null>(null);
   const [photos, setPhotos] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
