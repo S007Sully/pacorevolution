@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/PageHeader";
-import { CalendarDays, MapPin } from "lucide-react";
+import { CalendarDays, MapPin, Crown } from "lucide-react";
 
 export const Route = createFileRoute("/_app/events")({
   component: Events,
@@ -33,8 +33,10 @@ function Events() {
               </div>
               <div className="p-4 flex items-center justify-between text-xs text-muted-foreground">
                 <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {e.location}</span>
-                <span className="flex items-center gap-1"><CalendarDays className="h-3 w-3" /> {new Date(e.date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
-                <span className="text-gold font-semibold">${e.price}</span>
+                <span className="flex items-center gap-1"><CalendarDays className="h-3 w-3" /> 8:00 PM</span>
+                <span className="flex items-center gap-1 text-gold font-semibold">
+                  <Crown className="h-3 w-3" /> Members Only
+                </span>
               </div>
             </article>
           </Link>
