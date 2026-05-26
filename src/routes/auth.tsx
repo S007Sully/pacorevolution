@@ -156,6 +156,36 @@ function AuthPage() {
           </div>
         )}
 
+        {mode === "forgot" && status === "success" && (
+          <div
+            role="status"
+            className="space-y-2 rounded-md border border-[color:var(--gold)]/40 bg-[color:var(--gold)]/5 px-3 py-3 text-xs text-[color:var(--foreground)] animate-in fade-in slide-in-from-top-1 duration-300"
+          >
+            <div className="flex items-start gap-2">
+              <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0 text-[color:var(--gold)]" />
+              <div className="space-y-1 leading-relaxed">
+                <p className="font-medium text-[color:var(--gold)]">Reset link sent</p>
+                <p className="text-muted-foreground">
+                  We sent a password reset link to <span className="text-[color:var(--gold)]/90">{email}</span>. Open it on this device to set a new password.
+                </p>
+              </div>
+            </div>
+            <ul className="ml-6 list-disc space-y-1 text-muted-foreground">
+              <li>Check your spam or promotions folder.</li>
+              <li>Make sure {email || "your address"} is spelled correctly.</li>
+              <li>Wait a minute, then{" "}
+                <button
+                  type="button"
+                  onClick={() => { setStatus("idle"); }}
+                  className="underline underline-offset-2 text-[color:var(--gold)] hover:text-[color:var(--gold)]/80"
+                >
+                  resend the link
+                </button>.
+              </li>
+            </ul>
+          </div>
+        )}
+
         <Button
           type="submit"
           disabled={busy}
