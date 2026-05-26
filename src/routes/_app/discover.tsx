@@ -1,8 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/PageHeader";
-import { Button } from "@/components/ui/button";
 import { Heart, X, MapPin } from "lucide-react";
 
 export const Route = createFileRoute("/_app/discover")({
@@ -16,30 +15,108 @@ type Profile = {
 };
 
 function Discover() {
+  const navigate = useNavigate();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [idx, setIdx] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState<string | null>(null);
+  const [matched, setMatched] = useState<Profile | null>(null);
 
   useEffect(() => {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      const { data } = await supabase.from("profiles")
+      if (!user) return;
+      setCurrentUser(user.id);
+
+      const { data: seen } = await supabase
+        .from("connections")
+        .select("to_user_id")
+        .eq("from_user_id", user.id);
+
+      const seenIds = (seen ?? []).map((r: any) => r.to_user_id);
+
+      let query = supabase
+        .from("profiles")
         .select("id,user_id,name,bio,location,avatar_url,photos,membership_tier")
         .eq("onboarding_complete", true)
-        .neq("user_id", user?.id ?? "")
+        .neq("user_id", user.id)
         .limit(20);
+
+      if (seenIds.length > 0) {
+        query = query.not("user_id", "in", `(${seenIds.join(",")})`);
+      }
+
+      const { data } = await query;
       setProfiles((data ?? []) as Profile[]);
       setLoading(false);
     })();
   }, []);
 
-  const advance = () => setIdx((i) => i + 1);
+  const act = async (action: "like" | "skip") => {
+    const current = profiles[idx];
+    if (!current || !currentUser) { setIdx((i) => i + 1); return; }
+
+    await supabase.from("connections").upsert({
+      from_user_id: currentUser,
+      to_user_id: current.user_id,
+      action,
+    }, { onConflict: "from_user_id,to_user_id" });
+
+    if (action === "like") {
+      const { data: mutual } = await supabase
+        .from("connections")
+        .select("id")
+        .eq("from_user_id", current.user_id)
+        .eq("to_user_id", currentUser)
+        .eq("action", "like")
+        .maybeSingle();
+
+      if (mutual) {
+        await supabase.from("connections")
+          .update({ matched: true })
+          .or(`and(from_user_id.eq.${currentUser},to_user_id.eq.${current.user_id}),and(from_user_id.eq.${current.user_id},to_user_id.eq.${currentUser})`);
+        setMatched(current);
+        return;
+      }
+    }
+
+    setIdx((i) => i + 1);
+  };
+
   const current = profiles[idx];
+
+  if (matched) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-8 text-center">
+        <div className="h-24 w-24 rounded-full overflow-hidden gold-border glow-gold mb-6">
+          {matched.avatar_url
+            ? <img src={matched.avatar_url} className="h-full w-full object-cover" />
+            : <div className="h-full w-full bg-gradient-to-br from-primary/40 to-card" />}
+        </div>
+        <p className="text-xs tracking-[0.4em] uppercase text-gold mb-2">It's a match</p>
+        <h2 className="text-3xl font-black mb-2">{matched.name}</h2>
+        <p className="text-sm text-muted-foreground mb-8">You and {matched.name} like each other.</p>
+        <div className="flex gap-4 w-full">
+          <button
+            onClick={() => { setMatched(null); setIdx((i) => i + 1); }}
+            className="flex-1 h-12 rounded-xl border border-border bg-transparent text-sm font-semibold"
+          >
+            Keep swiping
+          </button>
+          <button
+            onClick={() => { setMatched(null); navigate({ to: "/messages/$userId", params: { userId: matched.user_id } }); }}
+            className="flex-1 h-12 rounded-xl bg-primary text-primary-foreground text-sm font-semibold glow-crimson"
+          >
+            Message
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
       <PageHeader eyebrow="Tonight" title="Discover">The room is curated. Swipe with intent.</PageHeader>
-
       <div className="px-5">
         {loading ? (
           <div className="aspect-[3/4] rounded-3xl bg-card animate-pulse" />
@@ -69,13 +146,18 @@ function Discover() {
             </div>
           </article>
         )}
-
         {current && (
           <div className="mt-6 flex items-center justify-center gap-6">
-            <button onClick={advance} className="h-14 w-14 rounded-full bg-card border border-border flex items-center justify-center hover:border-muted-foreground transition-colors">
+            <button
+              onClick={() => act("skip")}
+              className="h-14 w-14 rounded-full bg-card border border-border flex items-center justify-center hover:border-muted-foreground transition-colors"
+            >
               <X className="h-6 w-6 text-muted-foreground" />
             </button>
-            <button onClick={advance} className="h-16 w-16 rounded-full bg-primary flex items-center justify-center glow-crimson hover:scale-105 transition-transform">
+            <button
+              onClick={() => act("like")}
+              className="h-16 w-16 rounded-full bg-primary flex items-center justify-center glow-crimson hover:scale-105 transition-transform"
+            >
               <Heart className="h-7 w-7 text-primary-foreground fill-current" />
             </button>
           </div>
