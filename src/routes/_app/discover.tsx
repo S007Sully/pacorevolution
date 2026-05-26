@@ -14,6 +14,9 @@ type Profile = {
   membership_tier: string | null;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const db = supabase as any;
+
 function Discover() {
   const navigate = useNavigate();
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -28,7 +31,7 @@ function Discover() {
       if (!user) return;
       setCurrentUser(user.id);
 
-      const { data: seen } = await supabase
+      const { data: seen } = await db
         .from("connections")
         .select("to_user_id")
         .eq("from_user_id", user.id);
@@ -56,14 +59,14 @@ function Discover() {
     const current = profiles[idx];
     if (!current || !currentUser) { setIdx((i) => i + 1); return; }
 
-    await supabase.from("connections").upsert({
+    await db.from("connections").upsert({
       from_user_id: currentUser,
       to_user_id: current.user_id,
       action,
     }, { onConflict: "from_user_id,to_user_id" });
 
     if (action === "like") {
-      const { data: mutual } = await supabase
+      const { data: mutual } = await db
         .from("connections")
         .select("id")
         .eq("from_user_id", current.user_id)
@@ -72,7 +75,7 @@ function Discover() {
         .maybeSingle();
 
       if (mutual) {
-        await supabase.from("connections")
+        await db.from("connections")
           .update({ matched: true })
           .or(`and(from_user_id.eq.${currentUser},to_user_id.eq.${current.user_id}),and(from_user_id.eq.${current.user_id},to_user_id.eq.${currentUser})`);
         setMatched(current);
