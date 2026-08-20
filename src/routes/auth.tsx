@@ -20,6 +20,7 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [confirmEmail, setConfirmEmail] = useState(false);
 
   const busy = status === "loading" || status === "success";
 
@@ -29,13 +30,20 @@ function AuthPage() {
     setErrorMsg(null);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: { emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
         setStatus("success");
+        // With email confirmation on, signUp returns no session. Routing to
+        // /onboarding here bounces straight back to /auth, so the user reads it
+        // as a broken login. Send them to their inbox instead.
+        if (!data.session) {
+          setConfirmEmail(true);
+          return;
+        }
         toast.success("Welcome to the revolution");
         setTimeout(() => navigate({ to: "/onboarding" }), 700);
       } else if (mode === "forgot") {
@@ -75,7 +83,7 @@ function AuthPage() {
       return (
         <span className="flex items-center justify-center gap-2">
           <CheckCircle2 className="h-4 w-4" />
-          {mode === "signin" ? "Welcome back" : mode === "signup" ? "You're in" : "Link sent"}
+          {mode === "signin" ? "Welcome back" : mode === "signup" ? (confirmEmail ? "Check your email" : "You're in") : "Link sent"}
         </span>
       );
     }
@@ -129,7 +137,7 @@ function AuthPage() {
                   <button
                     type="button"
                     disabled={busy}
-                    onClick={() => { setMode("forgot"); setStatus("idle"); setErrorMsg(null); }}
+                    onClick={() => { setMode("forgot"); setStatus("idle"); setErrorMsg(null); setConfirmEmail(false); }}
                     className="text-[10px] uppercase tracking-wider text-muted-foreground hover:text-gold transition-colors disabled:opacity-50"
                   >
                     Forgot?
@@ -153,6 +161,35 @@ function AuthPage() {
           >
             <AlertCircle className="h-4 w-4 mt-0.5 shrink-0 text-[color:var(--crimson)]" />
             <span className="leading-relaxed">{errorMsg}</span>
+          </div>
+        )}
+
+        {mode === "signup" && status === "success" && confirmEmail && (
+          <div
+            role="status"
+            className="space-y-2 rounded-md border border-[color:var(--gold)]/40 bg-[color:var(--gold)]/5 px-3 py-3 text-xs text-[color:var(--foreground)] animate-in fade-in slide-in-from-top-1 duration-300"
+          >
+            <div className="flex items-start gap-2">
+              <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0 text-[color:var(--gold)]" />
+              <div className="space-y-1 leading-relaxed">
+                <p className="font-medium text-[color:var(--gold)]">Confirm your email</p>
+                <p className="text-muted-foreground">
+                  We sent a confirmation link to <span className="text-[color:var(--gold)]/90">{email}</span>. Open it on this device to finish setting up your account.
+                </p>
+              </div>
+            </div>
+            <ul className="ml-6 list-disc space-y-1 text-muted-foreground">
+              <li>Check your spam or promotions folder.</li>
+              <li>Already confirmed?{" "}
+                <button
+                  type="button"
+                  onClick={() => { setMode("signin"); setStatus("idle"); setErrorMsg(null); setConfirmEmail(false); }}
+                  className="underline underline-offset-2 text-[color:var(--gold)] hover:text-[color:var(--gold)]/80"
+                >
+                  sign in
+                </button>.
+              </li>
+            </ul>
           </div>
         )}
 
@@ -206,6 +243,7 @@ function AuthPage() {
             setMode(next);
             setStatus("idle");
             setErrorMsg(null);
+            setConfirmEmail(false);
           }}
           className="w-full text-center text-xs text-muted-foreground hover:text-gold transition-colors disabled:opacity-50"
         >
