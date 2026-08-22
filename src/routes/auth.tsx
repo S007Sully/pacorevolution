@@ -20,6 +20,7 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [awaitingConfirm, setAwaitingConfirm] = useState(false);
 
   const busy = status === "loading" || status === "success";
 
@@ -29,12 +30,21 @@ function AuthPage() {
     setErrorMsg(null);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: { emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
+        // With email confirmation enabled, signUp returns no session. Routing
+        // to /onboarding here would bounce straight back to this screen and
+        // look like the new password simply doesn't work.
+        if (!data.session) {
+          setAwaitingConfirm(true);
+          setStatus("success");
+          toast.success("Check your email to confirm your account");
+          return;
+        }
         setStatus("success");
         toast.success("Welcome to the revolution");
         setTimeout(() => navigate({ to: "/onboarding" }), 700);
@@ -129,7 +139,7 @@ function AuthPage() {
                   <button
                     type="button"
                     disabled={busy}
-                    onClick={() => { setMode("forgot"); setStatus("idle"); setErrorMsg(null); }}
+                    onClick={() => { setMode("forgot"); setStatus("idle"); setErrorMsg(null); setAwaitingConfirm(false); }}
                     className="text-[10px] uppercase tracking-wider text-muted-foreground hover:text-gold transition-colors disabled:opacity-50"
                   >
                     Forgot?
@@ -153,6 +163,27 @@ function AuthPage() {
           >
             <AlertCircle className="h-4 w-4 mt-0.5 shrink-0 text-[color:var(--crimson)]" />
             <span className="leading-relaxed">{errorMsg}</span>
+          </div>
+        )}
+
+        {mode === "signup" && awaitingConfirm && (
+          <div
+            role="status"
+            className="space-y-2 rounded-md border border-[color:var(--gold)]/40 bg-[color:var(--gold)]/5 px-3 py-3 text-xs text-[color:var(--foreground)] animate-in fade-in slide-in-from-top-1 duration-300"
+          >
+            <div className="flex items-start gap-2">
+              <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0 text-[color:var(--gold)]" />
+              <div className="space-y-1 leading-relaxed">
+                <p className="font-medium text-[color:var(--gold)]">Confirm your email</p>
+                <p className="text-muted-foreground">
+                  We sent a confirmation link to <span className="text-[color:var(--gold)]/90">{email}</span>. Open it to activate your account, then sign in.
+                </p>
+              </div>
+            </div>
+            <ul className="ml-6 list-disc space-y-1 text-muted-foreground">
+              <li>Check your spam or promotions folder.</li>
+              <li>Your password won't work until the link is opened.</li>
+            </ul>
           </div>
         )}
 
@@ -206,6 +237,7 @@ function AuthPage() {
             setMode(next);
             setStatus("idle");
             setErrorMsg(null);
+            setAwaitingConfirm(false);
           }}
           className="w-full text-center text-xs text-muted-foreground hover:text-gold transition-colors disabled:opacity-50"
         >

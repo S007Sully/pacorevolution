@@ -93,10 +93,14 @@ function Onboarding() {
   const finish = async () => {
     if (!user) return;
     setBusy(true);
-    const { error } = await supabase.from("profiles").update({
+    // upsert, not update: an update matching zero rows is not an error, so a
+    // member whose profiles row is missing would "finish" onboarding, land on
+    // /discover, and get sent straight back here on the next sign-in.
+    const { error } = await supabase.from("profiles").upsert({
+      user_id: user.id,
       name, bio, location, membership_tier: tier, avatar_url: avatar, photos,
       onboarding_complete: true, updated_at: new Date().toISOString(),
-    }).eq("user_id", user.id);
+    }, { onConflict: "user_id" });
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Welcome inside.");
