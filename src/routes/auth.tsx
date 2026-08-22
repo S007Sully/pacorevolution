@@ -21,8 +21,27 @@ function AuthPage() {
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [awaitingConfirm, setAwaitingConfirm] = useState(false);
+  const [resendState, setResendState] = useState<"idle" | "sending" | "sent">("idle");
 
   const busy = status === "loading" || status === "success";
+
+  // Supabase rejects sign-in with "Email not confirmed" when the account exists
+  // but the confirmation link was never opened. That is a recoverable state, not
+  // a wrong password, so offer the member a way out of it.
+  const emailUnconfirmed =
+    status === "error" && /email not confirmed/i.test(errorMsg ?? "");
+
+  const resendConfirmation = async () => {
+    setResendState("sending");
+    const { error } = await supabase.auth.resend({ type: "signup", email });
+    if (error) {
+      toast.error(error.message);
+      setResendState("idle");
+      return;
+    }
+    setResendState("sent");
+    toast.success("Confirmation email sent");
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,7 +158,7 @@ function AuthPage() {
                   <button
                     type="button"
                     disabled={busy}
-                    onClick={() => { setMode("forgot"); setStatus("idle"); setErrorMsg(null); setAwaitingConfirm(false); }}
+                    onClick={() => { setMode("forgot"); setStatus("idle"); setErrorMsg(null); setAwaitingConfirm(false); setResendState("idle"); }}
                     className="text-[10px] uppercase tracking-wider text-muted-foreground hover:text-gold transition-colors disabled:opacity-50"
                   >
                     Forgot?
@@ -162,7 +181,28 @@ function AuthPage() {
             className="flex items-start gap-2 rounded-md border border-[color:var(--crimson)]/40 bg-[color:var(--crimson)]/10 px-3 py-2 text-xs text-[color:var(--foreground)] animate-in fade-in slide-in-from-top-1 duration-300"
           >
             <AlertCircle className="h-4 w-4 mt-0.5 shrink-0 text-[color:var(--crimson)]" />
-            <span className="leading-relaxed">{errorMsg}</span>
+            <div className="space-y-1.5 leading-relaxed">
+              <span>{errorMsg}</span>
+              {emailUnconfirmed && (
+                <p className="text-muted-foreground">
+                  This account exists but hasn't been confirmed yet.{" "}
+                  {resendState === "sent" ? (
+                    <span className="text-[color:var(--gold)]">
+                      Confirmation email sent — check your spam folder.
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={resendState === "sending"}
+                      onClick={resendConfirmation}
+                      className="underline underline-offset-2 text-[color:var(--gold)] hover:text-[color:var(--gold)]/80 disabled:opacity-50"
+                    >
+                      {resendState === "sending" ? "Sending…" : "Resend the confirmation email"}
+                    </button>
+                  )}
+                </p>
+              )}
+            </div>
           </div>
         )}
 
@@ -238,6 +278,7 @@ function AuthPage() {
             setStatus("idle");
             setErrorMsg(null);
             setAwaitingConfirm(false);
+            setResendState("idle");
           }}
           className="w-full text-center text-xs text-muted-foreground hover:text-gold transition-colors disabled:opacity-50"
         >
